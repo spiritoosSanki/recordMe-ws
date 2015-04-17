@@ -16,8 +16,11 @@ public class User {
 	public String password;
 	public String firstName;
 	public String lastName;
+	
 	public boolean valid = false;
 	public String validToken;
+	public String validDate;
+	
 	public short type = TYPE_DEFAULT;
 	public Map<String, String> properties = new HashMap<String, String>();
 	

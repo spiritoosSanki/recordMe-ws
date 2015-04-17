@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.mongojack.DBQuery.Query;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -49,6 +50,10 @@ public class ObjectEngine {
 		ObjectEngine.database.getCollection(type).insertOne(document);
 	}
 	
+	public static void removeObject(String id, String type) throws Exception {
+		ObjectEngine.database.getCollection(type).findOneAndDelete(eq("_id", id));
+	}
+	
 	public static <T> T getObject(String id, String type, Class<T> outputClass) throws Exception {
 		Document document = ObjectEngine.database.getCollection(type).find(eq("_id", id)).first();
 		if(document == null) {
@@ -57,7 +62,7 @@ public class ObjectEngine {
 		return RecMeJSON.mapper.readValue(document.toJson(), outputClass);
 	}
 	
-	public static <T> List<T> search(List<List<Term>> terms, String type, Class<T> outputClass) throws RecMeException {
+	public static <T> List<T> search(List<List<Term>> terms, String type, int offset, int bucketSize, Class<T> outputClass) throws RecMeException {
 		List<T> results = new ArrayList<T>();
 		
 		List<Bson> ors = new ArrayList<Bson>();
@@ -87,7 +92,7 @@ public class ObjectEngine {
 		
 		Bson query = or(ors);
 		
-		MongoCursor<Document> cursor = ObjectEngine.database.getCollection(type).find(query).iterator();
+		MongoCursor<Document> cursor = ObjectEngine.database.getCollection(type).find(query).skip(offset).limit(offset + bucketSize).iterator();
 		
 		try {
 		    while(cursor.hasNext()) {

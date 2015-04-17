@@ -18,9 +18,17 @@ public class SecurityEngine {
 		
 		try {
 			User user = usersService.get(userIdFromSid(sessionId));
-			//TODO for(args)
+			if(user.type == User.TYPE_ROOT) {
+				return user;
+			}
+			if(user.valid) {
+				for(short arg : args) {
+					if(user.type == arg) {
+						return user;
+					}
+				}
+			}
 		} catch(RecMeException e) {
-			throw new RecMeException(401, "Unauthorized");
 		}
 		throw new RecMeException(401, "Unauthorized");
 	}
