@@ -3,13 +3,36 @@ package com.ninsina.recordMe.core;
 import java.util.concurrent.TimeUnit;
 
 import org.bson.Document;
-import com.mongodb.client.model.IndexOptions;
 
+import com.mongodb.client.model.IndexOptions;
+import com.ninsina.recordMe.sdk.User;
+import com.ninsina.recordMe.ws.users.UsersService;
+
+//TODO in the future do all this in script when installing RecMe-ws
 public class IndexEngine {
 	
 	
-	//TODO in the future put index creation in a script when creating the DBs
-	public static void initIndexes(long ttl) {
+	
+	public static void init(long ttl, String rootLogin, String rootPsw) {
+		initIndex(ttl);
+		initRoot(rootLogin, rootPsw);
+	}
+	
+	private static void initRoot(String rootLogin, String rootPsw) {
+		try {
+			User user = new User();
+			user.id = "recme-root";
+			user.email = rootLogin;
+			user.password = rootPsw;
+			user.type = User.TYPE_ROOT;
+			user.valid = true;
+			ObjectEngine.putObject(user, UsersService.TYPE_USERS);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void initIndex(long ttl) {
 		Document key = new Document(SecurityEngine.FIELD_TTL, 1);
 		IndexOptions options = new IndexOptions();
 		options.expireAfter(ttl, TimeUnit.MINUTES);

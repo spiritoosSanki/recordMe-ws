@@ -2,20 +2,25 @@ package com.ninsina.recordMe.sdk;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class User {
 
 	public static short TYPE_DEFAULT = 0;
 	public static short TYPE_ROOT = 1;
 	public static short TYPE_ADMIN = 2;
-	public static short TYPE_USER = 3;
+	public static short TYPE_FOREIGN_ADMIN = 3;
+	public static short TYPE_USER = 4;
 	
-	public String id;
+	public String id = UUID.randomUUID().toString();
 	// login
 	public String email;
 	public String password;
+	public String oldPassword;
 	public String firstName;
 	public String lastName;
+	
+	public String adminId;
 	
 	public boolean valid = false;
 	public String validToken;
@@ -57,6 +62,15 @@ public class User {
 	}
 	public void setProperties(Map<String, String> properties) {
 		this.properties = properties;
+	}
+	
+	@Override
+	public String toString() {
+		return "User [id=" + id + ", email=" + email + ", password=" + password
+				+ ", firstName=" + firstName + ", lastName=" + lastName
+				+ ", valid=" + valid + ", validToken=" + validToken
+				+ ", validDate=" + validDate + ", type=" + type
+				+ ", properties=" + properties + "]";
 	}
 	
 	

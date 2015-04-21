@@ -1,4 +1,4 @@
-package com.ninsina.recordMe.sdk;
+package com.ninsina.recordMe.core;
 
 public class Session {
 
@@ -6,7 +6,6 @@ public class Session {
 	public String datetime;
 	
 	public Session() {
-		
 	}
 	
 	public Session(String sid, String datetime) {
@@ -30,5 +29,10 @@ public class Session {
 
 	public void setDatetime(String datetime) {
 		this.datetime = datetime;
+	}
+
+	@Override
+	public String toString() {
+		return "Session [sid=" + sid + ", datetime=" + datetime + "]";
 	}
 }

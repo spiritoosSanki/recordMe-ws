@@ -194,6 +194,9 @@ public class RecordMe {
 	private <T> T decodeContent(String json, Class<T> outputClass) throws RecMeException {
 		
 		T resp = null;
+		if(outputClass.equals(String.class)) {
+			return (T) json;
+		}
 		try {
 //			org.codehaus.jackson.type.JavaType javaType = mapper.getTypeFactory().constructParametricType(
 //					com.oym.links.sdk.LinksResponse.class, outputClass);
@@ -273,11 +276,10 @@ public class RecordMe {
 
 	}
 	
-	private String get(String path, String sessionId, String jsonObject) throws RecMeException {
+	private String getReq(String path, String sessionId) throws RecMeException {
 
 		if (debug)
-			System.out.println("calling recordMe-ws :" + (webServiceURL + path) + " with sessionId:" + sessionId
-					+ " and json object:" + jsonObject);
+			System.out.println("calling recordMe-ws :" + (webServiceURL + path) + " with sessionId:" + sessionId);
 
 		HttpGet get = new HttpGet(webServiceURL + path);
 		//post.getParams().setCookiePolicy(org.apache.http.client.params.CookiePolicy.IGNORE_COOKIES);
@@ -326,6 +328,8 @@ public class RecordMe {
 			try {
 				req.releaseConnection();
 			} catch (Exception ex) {
+				if (debug)
+					System.out.println("error : " + ex);
 			}
 		}
 	}
@@ -345,12 +349,34 @@ public class RecordMe {
 	
 	
 	public class Users {
-		
-		
+
 		public String login(String login, String password) throws RecMeException {
 			Map<String, String> req = new HashMap<String, String>();
+			req.put("login", login);
+			req.put("password", password);
 			String content = post("/users/login", null, jsonify(req));
 			return decodeContent(content, String.class);
+		}
+		
+		public void create(String sessionId, User user) throws RecMeException {
+			post("/users", sessionId, jsonify(user));
+		}
+		
+		/**
+		 * Get a user by his ID.
+		 * Normal user can get only itself. So easier to use get(Session id)
+		 * */
+		public User get(String sessionId, String userId) throws RecMeException {
+			String content = getReq("/users/" + userId, sessionId);
+			return decodeContent(content, User.class);
+		}
+		
+		/**
+		 * Get connected user.
+		 * */
+		public User get(String sessionId) throws RecMeException {
+			String content = getReq("/users", sessionId);
+			return decodeContent(content, User.class);
 		}
 	}
 	

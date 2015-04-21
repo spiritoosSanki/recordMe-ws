@@ -3,7 +3,6 @@ package com.ninsina.recordMe.core;
 import java.util.UUID;
 
 import com.ninsina.recordMe.sdk.RecordMe;
-import com.ninsina.recordMe.sdk.Session;
 import com.ninsina.recordMe.sdk.User;
 import com.ninsina.recordMe.ws.users.UsersService;
 
@@ -14,10 +13,10 @@ public class SecurityEngine {
 	
 	private static UsersService usersService = new UsersService();
 	
-	public static User checkUserRight(String sessionId, short... args) throws RecMeException {
+	public static User checkUserAccess(String sessionId, short... args) throws RecMeException {
 		
 		try {
-			User user = usersService.get(userIdFromSid(sessionId));
+			User user = usersService.uncheckedGet(userIdFromSid(sessionId));
 			if(user.type == User.TYPE_ROOT) {
 				return user;
 			}
@@ -39,7 +38,7 @@ public class SecurityEngine {
 		return sid;
 	}
 	
-	private static String userIdFromSid(String sid) {
+	public static String userIdFromSid(String sid) {
 		return sid.split("_")[0];
 	}
 	

@@ -32,7 +32,11 @@ public class Bootstrap extends Application {
     			properties.getProperty("mongo_uris"), 
     			properties.getProperty("db_name")
     	);
-    	IndexEngine.initIndexes(Long.parseLong(properties.getProperty("initIndexes")));
+    	IndexEngine.init(
+    			Long.parseLong(properties.getProperty("session_ttl")), 
+    			properties.getProperty("root_login"),
+    			properties.getProperty("root_psw")
+    	);
         
 	}
 }

@@ -15,13 +15,11 @@ import java.util.List;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.mongojack.DBQuery.Query;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.util.JSON;
 import com.ninsina.recordMe.sdk.Term;
 
 public class ObjectEngine {
@@ -29,7 +27,7 @@ public class ObjectEngine {
 	private static ObjectEngine instance;
 	
 	private static MongoClient client;
-	public static MongoDatabase database;
+	static MongoDatabase database;
 	
 	public ObjectEngine(String uris, String dbName) {
 		client = new MongoClient(new MongoClientURI(uris));
@@ -43,10 +41,8 @@ public class ObjectEngine {
 	}
 	
 	public static <T> void putObject(T object, String type) throws Exception {
-		Document document = (Document) JSON.parse(RecMeJSON.mapper.writeValueAsString(object));
-		if(document.getString("id") != null) {
-			document.put("_id", document.getString("id"));
-		}
+		Document document = Document.parse(RecMeJSON.mapper.writeValueAsString(object));
+		document = marshalDoc(document);
 		ObjectEngine.database.getCollection(type).insertOne(document);
 	}
 	
@@ -59,7 +55,20 @@ public class ObjectEngine {
 		if(document == null) {
 			return null;
 		}
+		document = unmarshalDoc(document);
 		return RecMeJSON.mapper.readValue(document.toJson(), outputClass);
+	}
+	
+	private static Document marshalDoc(Document document) {
+		if(document.getString("id") != null) {
+			document.put("_id", document.getString("id"));
+		}
+		return document;
+	}
+	
+	private static Document unmarshalDoc(Document document) {
+		document.remove("_id");
+		return document;
 	}
 	
 	public static <T> List<T> search(List<List<Term>> terms, String type, int offset, int bucketSize, Class<T> outputClass) throws RecMeException {
@@ -95,8 +104,11 @@ public class ObjectEngine {
 		MongoCursor<Document> cursor = ObjectEngine.database.getCollection(type).find(query).skip(offset).limit(offset + bucketSize).iterator();
 		
 		try {
+			Document doc = null;
 		    while(cursor.hasNext()) {
-		        results.add(RecMeJSON.mapper.readValue(cursor.next().toJson(), outputClass));
+		    	doc = cursor.next();
+		    	doc = unmarshalDoc(doc);
+		        results.add(RecMeJSON.mapper.readValue(doc.toJson(), outputClass));
 		    }
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -123,11 +135,12 @@ public class ObjectEngine {
 			try {
 				return Integer.parseInt(value);
 			} catch(Exception e2) {
-				try {
-					return Boolean.parseBoolean(value);
-				} catch(Exception e3) {
-					return value;
+				if("true".equals(value)) {
+					return true;
+				} else if("false".equals(value)) {
+					return false;
 				}
+				return value;
 			}
 		}
 	}
