@@ -1,5 +1,6 @@
 package com.ninsina.recordMe.core;
 
+import java.util.Date;
 import java.util.UUID;
 
 import com.ninsina.recordMe.sdk.RecordMe;
@@ -34,7 +35,7 @@ public class SecurityEngine {
 
 	public static String generateAndRegisterSid(User user) throws Exception {
 		String sid = generateSid(user);
-		ObjectEngine.putObject(new Session(sid , RecordMe.getIso8601UTCDateString(null)), TYPE_SESSIONS);
+		ObjectEngine.putObject(new Session(sid, (new Date()).getTime()), TYPE_SESSIONS);
 		return sid;
 	}
 	

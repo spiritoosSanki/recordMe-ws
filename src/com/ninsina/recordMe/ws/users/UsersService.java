@@ -44,26 +44,30 @@ public class UsersService {
 	
 	//TODO filter fields like passwords
 	public User get(String sid, String userId) throws RecMeException {
-		User currentUser = SecurityEngine.checkUserAccess(sid, User.TYPE_ADMIN, User.TYPE_USER);
+		User currentUser = SecurityEngine.checkUserAccess(sid, User.TYPE_ADMIN, User.TYPE_FOREIGN_ADMIN, User.TYPE_USER);
 		try {
+			if(userId == null || "null".equals(userId) || currentUser.id.equals(userId)) {
+				currentUser.validToken = "";
+				return currentUser;
+			}
+			
 			if(currentUser.type == User.TYPE_ROOT || currentUser.type == User.TYPE_ADMIN) {
-				if(userId == null || "null".equals(userId)) {
-					return currentUser;
-				} else {
-					return uncheckedGet(userId);
-				}
+				return uncheckedGet(userId);
 			} else if(currentUser.type == User.TYPE_FOREIGN_ADMIN) {
-				if(currentUser.id.equals(userId)) {
-					currentUser.validToken = "";
-					return currentUser;
+				List<User> tmp = uncheckedSearch(
+						Arrays.asList(Arrays.asList(
+								new Term("id", Term.OPERATOR_EQ, userId),
+								new Term("adminId", Term.OPERATOR_EQ, currentUser.id))
+						), 
+						0, 
+						1
+				);
+				if(tmp.size() != 1) {
+					throw new RecMeException(401, "Wrong privileges. Foreign admin can get only himself and user he created.");
 				} else {
-					User user = uncheckedGet(userId); //TODO do it with a search
-					if(currentUser.id.equals(user.adminId)) {
-						user.validToken = "";
-						return user;
-					} else {
-						throw new RecMeException(401, "Wrong privileges. Foreign admin can get only himself and user he created.");
-					}
+					User user = tmp.get(0);
+					user.validToken = "";
+					return user;
 				}
 			} else if(currentUser.type == User.TYPE_USER && currentUser.id.equals(userId)) {
 				currentUser.validToken = "";
@@ -97,7 +101,15 @@ public class UsersService {
 			if(oldUser == null) {
 				throw new RecMeException(404, "User does not exist");
 			}
-			checkCreateUpdateRights(currentUser, oldUser);
+			if(currentUser.type == User.TYPE_ADMIN) {
+				if(user.type == User.TYPE_ROOT) {
+					throw new RecMeException(401, "Admin can only update users, foreign admins and himself");
+				}
+			} else if(currentUser.type == User.TYPE_FOREIGN_ADMIN) {
+				if(user.type != User.TYPE_USER && user.type != User.TYPE_FOREIGN_ADMIN) {
+					throw new RecMeException(401, "Foreign admin can only update users and himself");
+				}
+			}
 			
 			if(!oldUser.password.equals(user.oldPassword)) {
 				throw new RecMeException(400, "Password and old password don't match"); 
@@ -193,23 +205,27 @@ public class UsersService {
 		return copy;
 	}
 
-	private void checkCreateUpdateRights(User currentUser, User user) throws RecMeException {
-		if(currentUser.type == User.TYPE_ADMIN) {
-			if(user.type != User.TYPE_USER && user.type != User.TYPE_FOREIGN_ADMIN) {
-				throw new RecMeException(400, "Admin can only create users and foreign admins");
-			}
-		} else if(currentUser.type == User.TYPE_FOREIGN_ADMIN) {
-			if(user.type != User.TYPE_USER) {
-				throw new RecMeException(400, "Foreign admin can only create users");
-			}
-		}
-	}
-	
 	public void create(String sessionId, User user) throws RecMeException {
 		User currentUser = SecurityEngine.checkUserAccess(sessionId, User.TYPE_ADMIN, User.TYPE_FOREIGN_ADMIN);
 		try {
 			checkParam(user);
-			checkCreateUpdateRights(currentUser, currentUser);
+			if(currentUser.type == User.TYPE_ADMIN) { //TODO not good
+				if(user.type != User.TYPE_USER && user.type != User.TYPE_FOREIGN_ADMIN) {
+					throw new RecMeException(401, "Admin can only create users and foreign admins");
+				}
+			} else if(currentUser.type == User.TYPE_FOREIGN_ADMIN) {
+				if(user.type != User.TYPE_USER) {
+					throw new RecMeException(400, "Foreign admin can only create users");
+				}
+			}
+			if(uncheckedGet(user.id) != null) {
+				throw new RecMeException(409, "User already exist");
+			}
+			
+			List<User> users = uncheckedSearch(Arrays.asList(Arrays.asList(new Term("email", Term.OPERATOR_EQ, user.email))), 0, 1);
+			if(users.size() != 0) {
+				throw new RecMeException(400, "Choose another email");
+			}
 			
 			if(currentUser.type == User.TYPE_FOREIGN_ADMIN) {
 				user.adminId = currentUser.id;
@@ -271,4 +287,35 @@ public class UsersService {
 		}
 	}
 
+	public List<User> uncheckedSearch(List<List<Term>> terms, int offset, int bucketSize) throws RecMeException {
+		return ObjectEngine.search(terms, TYPE_USERS, offset, bucketSize, User.class);
+	}
+
+	public void remove(String sessionId, String userId) throws RecMeException {
+		User currentUser = SecurityEngine.checkUserAccess(sessionId, User.TYPE_ADMIN, User.TYPE_FOREIGN_ADMIN);
+		try {
+			if(SecurityEngine.userIdFromSid(sessionId).equals(userId)) {
+				throw new RecMeException(401, "Can not remove self");
+			}
+			User user = uncheckedGet(userId);
+			if(user == null) {
+				throw new RecMeException(404, "User does not exist");
+			}
+			if(currentUser.type == User.TYPE_ADMIN) {
+				if(user.type != User.TYPE_USER && user.type != User.TYPE_FOREIGN_ADMIN) {
+					throw new RecMeException(401, "Admin can only remove users and foreign admins");
+				}
+			}
+			if(currentUser.type == User.TYPE_FOREIGN_ADMIN && !currentUser.id.equals(user.adminId)) {
+				throw new RecMeException(404, "User does not exist"); // general error message. To not hint at users id outside the scope
+			}
+			//TODO send mail ?
+			ObjectEngine.removeObject(userId, TYPE_USERS);
+		} catch (RecMeException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new RecMeException();
+		}
+	}
+	
 }

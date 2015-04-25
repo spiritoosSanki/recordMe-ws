@@ -3,14 +3,14 @@ package com.ninsina.recordMe.core;
 public class Session {
 
 	public String sid;
-	public String datetime;
+	public long datetime;
 	
 	public Session() {
 	}
 	
-	public Session(String sid, String datetime) {
+	public Session(String sid, long date) {
 		this.sid = sid;
-		this.datetime = datetime;
+		this.datetime = date;
 	}
 
 	
@@ -23,11 +23,11 @@ public class Session {
 		this.sid = sid;
 	}
 
-	public String getDatetime() {
+	public long getDatetime() {
 		return datetime;
 	}
 
-	public void setDatetime(String datetime) {
+	public void setDatetime(long datetime) {
 		this.datetime = datetime;
 	}
 

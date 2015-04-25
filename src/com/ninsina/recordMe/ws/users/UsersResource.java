@@ -3,6 +3,7 @@ package com.ninsina.recordMe.ws.users;
 import java.util.Map;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -15,7 +16,6 @@ import javax.ws.rs.core.Response;
 import org.jboss.resteasy.logging.Logger;
 
 import com.ninsina.recordMe.core.RecMeException;
-import com.ninsina.recordMe.core.SecurityEngine;
 import com.ninsina.recordMe.sdk.User;
 
 @Path("/users")
@@ -40,7 +40,7 @@ public class UsersResource {
 			log.debug("error: " + e.status + " msg: " + e.msg);
             res = Response.status(e.status).entity(e.msg).build();
 		}
-//		log.debug("login end;POST;{};{};{}", res.getStatus(), System.nanoTime() - start, login + "," + password);
+		log.debug("login end;POST;{};{};{}", new Object[] {res.getStatus(), System.nanoTime() - start, login + "," + password});
 		return res;
 	}
 	
@@ -64,6 +64,20 @@ public class UsersResource {
 	public Response validate(@PathParam("token") String token) {
 		try {
 			usersService.validate(token);
+			return Response.status(202).build();
+		} catch (RecMeException e) {
+			log.debug("error: " + e.status + " msg: " + e.msg);
+            return Response.status(e.status).entity(e.msg).build();
+		}
+	}
+	
+	@DELETE
+	@Path("/{userId}")
+	@Consumes("application/json")
+	@Produces("application/json")
+	public Response remove(@HeaderParam("sessionId") String sessionId, @PathParam("userId") String userId) {
+		try {
+			usersService.remove(sessionId, userId);
 			return Response.status(202).build();
 		} catch (RecMeException e) {
 			log.debug("error: " + e.status + " msg: " + e.msg);

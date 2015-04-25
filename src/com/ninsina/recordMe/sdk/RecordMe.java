@@ -191,6 +191,7 @@ public class RecordMe {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private <T> T decodeContent(String json, Class<T> outputClass) throws RecMeException {
 		
 		T resp = null;
@@ -362,6 +363,18 @@ public class RecordMe {
 			post("/users", sessionId, jsonify(user));
 		}
 		
+		public void update(String sessionId, User user) throws RecMeException {
+			put("/users", sessionId, jsonify(user));
+		}
+		
+		public void validate(String sessionId, String token) throws RecMeException {
+			put("/users/validate/" + token, sessionId, null);
+		}
+		
+		public void remove(String sessionId, String id) throws RecMeException {
+			delete("/users/" + id, sessionId, null);
+		}
+		
 		/**
 		 * Get a user by his ID.
 		 * Normal user can get only itself. So easier to use get(Session id)
@@ -375,7 +388,7 @@ public class RecordMe {
 		 * Get connected user.
 		 * */
 		public User get(String sessionId) throws RecMeException {
-			String content = getReq("/users", sessionId);
+			String content = getReq("/users/null", sessionId);
 			return decodeContent(content, User.class);
 		}
 	}
