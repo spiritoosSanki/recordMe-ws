@@ -3,7 +3,6 @@ package com.ninsina.recordMe.core;
 import java.util.Date;
 import java.util.UUID;
 
-import com.ninsina.recordMe.sdk.RecordMe;
 import com.ninsina.recordMe.sdk.User;
 import com.ninsina.recordMe.ws.users.UsersService;
 
@@ -15,6 +14,21 @@ public class SecurityEngine {
 	private static UsersService usersService = new UsersService();
 	
 	public static User checkUserAccess(String sessionId, short... args) throws RecMeException {
+		
+		if(sessionId == null || "null".equals(sessionId)) {
+			throw new RecMeException(401, "Request without session id");
+		}
+		
+		try {
+			Session session = ObjectEngine.getObject(sessionId, TYPE_SESSIONS, Session.class);
+			if(session == null) {
+				throw new RecMeException(401, "Session expired");
+			}
+			session.datetime = (new Date()).getTime();
+			ObjectEngine.putObject(session, TYPE_SESSIONS);
+		} catch(Exception e) {
+			throw new RecMeException(401, "Session expired");
+		}
 		
 		try {
 			User user = usersService.uncheckedGet(userIdFromSid(sessionId));
@@ -29,6 +43,7 @@ public class SecurityEngine {
 				}
 			}
 		} catch(RecMeException e) {
+			e.printStackTrace();
 		}
 		throw new RecMeException(401, "Unauthorized");
 	}

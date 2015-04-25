@@ -2,25 +2,25 @@ package com.ninsina.recordMe.core;
 
 public class Session {
 
-	public String sid;
+	public String id;
 	public long datetime;
 	
 	public Session() {
 	}
 	
 	public Session(String sid, long date) {
-		this.sid = sid;
+		this.id = sid;
 		this.datetime = date;
 	}
 
 	
 	
 	public String getSid() {
-		return sid;
+		return id;
 	}
 
 	public void setSid(String sid) {
-		this.sid = sid;
+		this.id = sid;
 	}
 
 	public long getDatetime() {
@@ -33,6 +33,6 @@ public class Session {
 
 	@Override
 	public String toString() {
-		return "Session [sid=" + sid + ", datetime=" + datetime + "]";
+		return "Session [sid=" + id + ", datetime=" + datetime + "]";
 	}
 }

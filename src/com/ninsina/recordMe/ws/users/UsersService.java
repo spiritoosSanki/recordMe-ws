@@ -209,7 +209,7 @@ public class UsersService {
 		User currentUser = SecurityEngine.checkUserAccess(sessionId, User.TYPE_ADMIN, User.TYPE_FOREIGN_ADMIN);
 		try {
 			checkParam(user);
-			if(currentUser.type == User.TYPE_ADMIN) { //TODO not good
+			if(currentUser.type == User.TYPE_ADMIN) {
 				if(user.type != User.TYPE_USER && user.type != User.TYPE_FOREIGN_ADMIN) {
 					throw new RecMeException(401, "Admin can only create users and foreign admins");
 				}
