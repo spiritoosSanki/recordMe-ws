@@ -2,6 +2,7 @@ package com.ninsina.recordMe.ws.users;
 
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -11,9 +12,11 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
-import org.jboss.resteasy.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ninsina.recordMe.core.RecMeException;
 import com.ninsina.recordMe.sdk.User;
@@ -21,16 +24,15 @@ import com.ninsina.recordMe.sdk.User;
 @Path("/users")
 public class UsersResource {
 	
-	Logger log = Logger.getLogger(UsersResource.class);
+	private Logger log = LoggerFactory.getLogger(UsersResource.class);
 	private static UsersService usersService = new UsersService();
 	
 	@POST
 	@Path("/login")
 	@Consumes("application/json")
 	@Produces("application/json")
-	public Response login(Map<String, String> request) {
+	public Response login(@Context HttpServletRequest httpReq, Map<String, String> request) {
 		long start = System.nanoTime();
-		log.debug("login start;POST;0;0;;");
 		String login = request.get("login");
 		String password = request.get("password");
 		Response res = null;
@@ -40,74 +42,94 @@ public class UsersResource {
 			log.debug("error: " + e.status + " msg: " + e.msg);
             res = Response.status(e.status).entity(e.msg).build();
 		}
-		log.debug("login end;POST;{};{};{}", new Object[] {res.getStatus(), System.nanoTime() - start, login + "," + password});
+		log.info("{};;users;POST;{};{};{}", new Object[] {httpReq.getRemoteAddr(), res.getStatus(), System.nanoTime() - start, login + "," + password});
 		return res;
 	}
 	
 	@POST
 	@Consumes("application/json")
 	@Produces("application/json")
-	public Response create(@HeaderParam("sessionId") String sessionId, User user) {
+	public Response create(@Context HttpServletRequest httpReq, @HeaderParam("sessionId") String sessionId, User user) {
+		long start = System.nanoTime();
+		Response res = null;
 		try {
 			usersService.create(sessionId, user);
-			return Response.status(201).build();
+			res = Response.status(201).build();
 		} catch (RecMeException e) {
 			log.debug("error: " + e.status + " msg: " + e.msg);
-            return Response.status(e.status).entity(e.msg).build();
+            res = Response.status(e.status).entity(e.msg).build();
 		}
+		log.info("{};{};users;POST;{};{};{}", new Object[] {httpReq.getRemoteAddr(), sessionId, res.getStatus(), System.nanoTime() - start, user});
+		return res;
 	}
 	
 	@PUT
 	@Path("/validate/{token}")
 	@Consumes("application/json")
 	@Produces("application/json")
-	public Response validate(@PathParam("token") String token) {
+	public Response validate(@Context HttpServletRequest httpReq, @PathParam("token") String token) {
+		long start = System.nanoTime();
+		Response res = null;
 		try {
 			usersService.validate(token);
-			return Response.status(202).build();
+			res = Response.status(202).build();
 		} catch (RecMeException e) {
 			log.debug("error: " + e.status + " msg: " + e.msg);
-            return Response.status(e.status).entity(e.msg).build();
+            res = Response.status(e.status).entity(e.msg).build();
 		}
+		log.info("{};;users;PUT;{};{};{}", new Object[] {httpReq.getRemoteAddr(), res.getStatus(), System.nanoTime() - start, token});
+		return res;
 	}
 	
 	@DELETE
 	@Path("/{userId}")
 	@Consumes("application/json")
 	@Produces("application/json")
-	public Response remove(@HeaderParam("sessionId") String sessionId, @PathParam("userId") String userId) {
+	public Response remove(@Context HttpServletRequest httpReq, @HeaderParam("sessionId") String sessionId, @PathParam("userId") String userId) {
+		long start = System.nanoTime();
+		Response res = null;
 		try {
 			usersService.remove(sessionId, userId);
-			return Response.status(202).build();
+			res = Response.status(202).build();
 		} catch (RecMeException e) {
 			log.debug("error: " + e.status + " msg: " + e.msg);
-            return Response.status(e.status).entity(e.msg).build();
+            res = Response.status(e.status).entity(e.msg).build();
 		}
+		log.info("{};{};users;DELETE;{};{};{}", new Object[] {httpReq.getRemoteAddr(), sessionId, res.getStatus(), System.nanoTime() - start, userId});
+		return res;
 	}
 	
 	@PUT
 	@Consumes("application/json")
 	@Produces("application/json")
-	public Response update(@HeaderParam("sessionId") String sessionId, User user) {
+	public Response update(@Context HttpServletRequest httpReq, @HeaderParam("sessionId") String sessionId, User user) {
+		long start = System.nanoTime();
+		Response res = null;
 		try {
 			usersService.update(sessionId, user);
-			return Response.status(201).build();
+			res = Response.status(201).build();
 		} catch (RecMeException e) {
 			log.debug("error: " + e.status + " msg: " + e.msg);
-            return Response.status(e.status).entity(e.msg).build();
+            res = Response.status(e.status).entity(e.msg).build();
 		}
+		log.info("{};{};users;PUT;{};{};{}", new Object[] {httpReq.getRemoteAddr(), sessionId, res.getStatus(), System.nanoTime() - start, user});
+		return res;
 	}
 	
 	@GET
 	@Path("{userId}")
 	@Consumes("application/json")
 	@Produces("application/json")
-	public Response get(@HeaderParam("sessionId") String sessionId, @PathParam("userId") String userId) {
+	public Response get(@Context HttpServletRequest httpReq, @HeaderParam("sessionId") String sessionId, @PathParam("userId") String userId) {
+		long start = System.nanoTime();
+		Response res = null;
 		try {
-			return Response.status(200).entity(usersService.get(sessionId, userId)).build();
+			res = Response.status(200).entity(usersService.get(sessionId, userId)).build();
 		} catch (RecMeException e) {
 			log.debug("error: " + e.status + " msg: " + e.msg);
-            return Response.status(e.status).entity(e.msg).build();
+            res = Response.status(e.status).entity(e.msg).build();
 		}
+		log.info("{};{};users;GET;{};{};{}", new Object[] {httpReq.getRemoteAddr(), sessionId, res.getStatus(), System.nanoTime() - start, userId});
+		return res;
 	}
 }

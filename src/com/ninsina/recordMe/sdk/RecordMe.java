@@ -312,7 +312,7 @@ public class RecordMe {
 			int statusCode = resp.getStatusLine().getStatusCode();
 			final byte[] data = EntityUtils.toByteArray(resp.getEntity());
     		String content = new String(data, "UTF-8");
-			if(statusCode != 200) {
+			if((statusCode >= 400) && (statusCode < 600)) {
 	    		throw new RecMeException(statusCode, content);
 			} else {
 				if (debug)

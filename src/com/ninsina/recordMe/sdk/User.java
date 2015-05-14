@@ -19,8 +19,9 @@ public class User {
 	public String oldPassword;
 	public String firstName;
 	public String lastName;
+	public String inscriptionDate;
 	
-	public String adminId;
+	public String creatorId;
 	
 	public boolean valid = false;
 	public String validToken;

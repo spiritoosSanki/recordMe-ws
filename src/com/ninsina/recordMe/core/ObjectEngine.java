@@ -20,18 +20,22 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.ninsina.recordMe.sdk.Term;
+
 
 public class ObjectEngine {
 	
 	private static ObjectEngine instance;
 	
-	private static MongoClient client;
+	static MongoClient client;
 	static MongoDatabase database;
+	static String dbName;
 	
-	public ObjectEngine(String uris, String dbName) {
+	public ObjectEngine(String uris, String dbNamee) {
 		client = new MongoClient(new MongoClientURI(uris));
-		database = client.getDatabase(dbName);
+		dbName = dbNamee;
+		database = client.getDatabase(dbNamee);
 	}
 
 	public static void init(String uris, String dbName) {
@@ -41,21 +45,51 @@ public class ObjectEngine {
 	}
 	
 	public static <T> void putObject(T object, String type) throws Exception {
-		Document document = Document.parse(RecMeJSON.mapper.writeValueAsString(object));
+		Document document = null;
+		if(object instanceof Session) {
+			Session session = (Session) object;
+		    document = new Document();
+		    document.put("id", session.id);
+		    document.put("datetime", session.datetime);
+		} else {
+			document = Document.parse(RecMeJSON.mapper.writeValueAsString(object));
+		}
 		document = marshalDoc(document);
 		ObjectEngine.database.getCollection(type).insertOne(document);
+	}
+	
+	public static <T> void updateObject(T object, String type) throws Exception {
+		Document document = null;
+		if(object instanceof Session) {
+			Session session = (Session) object;
+		    document = new Document();
+		    document.put("id", session.id);
+		    document.put("datetime", session.datetime);
+		} else {
+			document = Document.parse(RecMeJSON.mapper.writeValueAsString(object));
+		}
+		document = marshalDoc(document);
+		UpdateResult res = ObjectEngine.database.getCollection(type).replaceOne(eq("_id", document.get("id")), document);
+		if(res.getModifiedCount() != 1) {
+			throw new RecMeException(404, "Object does not exist");
+		}
 	}
 	
 	public static void removeObject(String id, String type) throws Exception {
 		ObjectEngine.database.getCollection(type).findOneAndDelete(eq("_id", id));
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static <T> T getObject(String id, String type, Class<T> outputClass) throws Exception {
 		Document document = ObjectEngine.database.getCollection(type).find(eq("_id", id)).first();
 		if(document == null) {
 			return null;
 		}
 		document = unmarshalDoc(document);
+		if(type.equals(SecurityEngine.TYPE_SESSIONS)) {
+			Session session = new Session(document.getString("id"), document.getDate("datetime"));
+			return (T) session;
+		}
 		return RecMeJSON.mapper.readValue(document.toJson(), outputClass);
 	}
 	

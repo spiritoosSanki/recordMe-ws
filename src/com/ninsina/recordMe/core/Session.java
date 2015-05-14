@@ -1,38 +1,42 @@
 package com.ninsina.recordMe.core;
 
+import java.util.Date;
+
 public class Session {
 
+	/** Session id */
 	public String id;
-	public long datetime;
+	public Date datetime;
 	
 	public Session() {
 	}
 	
-	public Session(String sid, long date) {
+	public Session(String sid, Date date) {
 		this.id = sid;
 		this.datetime = date;
 	}
 
 	
 	
-	public String getSid() {
+	public String getId() {
 		return id;
 	}
 
-	public void setSid(String sid) {
+	public void setId(String sid) {
 		this.id = sid;
 	}
 
-	public long getDatetime() {
+	public Date getDatetime() {
 		return datetime;
 	}
 
-	public void setDatetime(long datetime) {
-		this.datetime = datetime;
+	public void setDatetime(Date date) {
+		datetime = date;
 	}
-
+	
 	@Override
 	public String toString() {
 		return "Session [sid=" + id + ", datetime=" + datetime + "]";
 	}
+
 }

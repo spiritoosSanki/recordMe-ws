@@ -37,5 +37,8 @@ public class IndexEngine {
 		IndexOptions options = new IndexOptions();
 		options.expireAfter(ttl, TimeUnit.MINUTES);
 		ObjectEngine.database.getCollection(SecurityEngine.TYPE_SESSIONS).createIndex(key, options);
+		
+//		(new DB(ObjectEngine.client, ObjectEngine.dbName)).command("db." + SecurityEngine.TYPE_SESSIONS + ".createIndex( { \"createdAt\": 1 }, { expireAfterSeconds: " + (ttl * 60) + " } )");
+		
 	}
 }

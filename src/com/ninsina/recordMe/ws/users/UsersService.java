@@ -43,6 +43,7 @@ public class UsersService {
 	}
 	
 	//TODO filter fields like passwords
+	// and filter depending on user connected
 	public User get(String sid, String userId) throws RecMeException {
 		User currentUser = SecurityEngine.checkUserAccess(sid, User.TYPE_ADMIN, User.TYPE_FOREIGN_ADMIN, User.TYPE_USER);
 		try {
@@ -57,7 +58,7 @@ public class UsersService {
 				List<User> tmp = uncheckedSearch(
 						Arrays.asList(Arrays.asList(
 								new Term("id", Term.OPERATOR_EQ, userId),
-								new Term("adminId", Term.OPERATOR_EQ, currentUser.id))
+								new Term("creatorId", Term.OPERATOR_EQ, currentUser.id))
 						), 
 						0, 
 						1
@@ -84,16 +85,13 @@ public class UsersService {
 	
 	public User uncheckedGet(String id) throws RecMeException {
 		try {
-			User user = ObjectEngine.getObject(id, TYPE_USERS, User.class);
-			if(user == null) {
-				throw new RecMeException(404, "User not found");
-			}
-			return user;
+			return ObjectEngine.getObject(id, TYPE_USERS, User.class);
 		} catch (Exception e) {
 			throw new RecMeException();
 		}
 	}
 
+	//TODO different users type can update different field
 	public void update(String sessionId, User user) throws RecMeException {
 		User currentUser = SecurityEngine.checkUserAccess(sessionId, User.TYPE_ADMIN, User.TYPE_FOREIGN_ADMIN, User.TYPE_USER);
 		try {
@@ -123,10 +121,10 @@ public class UsersService {
 					throw new RecMeException(401, "Users can only update themselves");
 				}
 				if(currentUser.type == User.TYPE_FOREIGN_ADMIN) {
-					if(oldUser.adminId == null) {
+					if(oldUser.creatorId == null) {
 						throw new RecMeException();
 					}
-					if(!oldUser.adminId.equals(currentUser.id)) {
+					if(!oldUser.creatorId.equals(currentUser.id)) {
 						throw new RecMeException(401, "Foreign admin can only update user they created");
 					}
 				}
@@ -135,7 +133,7 @@ public class UsersService {
 			}
 			
 			//TODO send update mail
-			ObjectEngine.putObject(updated, TYPE_USERS);
+			ObjectEngine.updateObject(updated, TYPE_USERS);
 		} catch (RecMeException e) {
 			throw e;
 		} catch (Exception e) {
@@ -146,7 +144,7 @@ public class UsersService {
 	private User copyLowerUser(User currentUser, User oldUser, User user) throws RecMeException {
 		User copy = new User();
 		copy.id = oldUser.id;
-		copy.adminId = oldUser.adminId;
+		copy.creatorId = oldUser.creatorId;
 		copy.email = user.email;
 		copy.firstName = user.firstName;
 		copy.lastName = user.lastName;
@@ -184,7 +182,7 @@ public class UsersService {
 	private User copySelf(User oldUser, User user) throws RecMeException {
 		User copy = new User();
 		copy.id = oldUser.id;
-		copy.adminId = oldUser.adminId;
+		copy.creatorId = oldUser.creatorId;
 		copy.email = user.email;
 		copy.firstName = user.firstName;
 		copy.lastName = user.lastName;
@@ -227,9 +225,8 @@ public class UsersService {
 				throw new RecMeException(400, "Choose another email");
 			}
 			
-			if(currentUser.type == User.TYPE_FOREIGN_ADMIN) {
-				user.adminId = currentUser.id;
-			}
+			user.creatorId = currentUser.id;
+			user.oldPassword = user.password;
 			
 			user.validToken = generateToken(user);
 			user.validDate = RecordMe.getIso8601UTCDateString(null);
@@ -259,11 +256,11 @@ public class UsersService {
 	}
 	
 	private void checkParam(User user) throws RecMeException {
-		if(!user.password.equals(user.oldPassword)) {
-			throw new RecMeException(400, "Password and old password don't match"); 
-		}
 		if(user.id == null) {
 			user.id = UUID.randomUUID().toString();
+		}
+		if(user.password == null || user.password.length() < 8) {
+			throw new RecMeException(400, "Password must be at least 8 characters long");
 		}
 		//TODO test email format etc...
 	}
@@ -292,9 +289,9 @@ public class UsersService {
 	}
 
 	public void remove(String sessionId, String userId) throws RecMeException {
-		User currentUser = SecurityEngine.checkUserAccess(sessionId, User.TYPE_ADMIN, User.TYPE_FOREIGN_ADMIN);
+		User currentUser = SecurityEngine.checkUserAccess(sessionId, User.TYPE_ADMIN, User.TYPE_USER);
 		try {
-			if(SecurityEngine.userIdFromSid(sessionId).equals(userId)) {
+			if(currentUser.type != User.TYPE_USER && SecurityEngine.userIdFromSid(sessionId).equals(userId)) {
 				throw new RecMeException(401, "Can not remove self");
 			}
 			User user = uncheckedGet(userId);
@@ -306,7 +303,7 @@ public class UsersService {
 					throw new RecMeException(401, "Admin can only remove users and foreign admins");
 				}
 			}
-			if(currentUser.type == User.TYPE_FOREIGN_ADMIN && !currentUser.id.equals(user.adminId)) {
+			if(currentUser.type == User.TYPE_FOREIGN_ADMIN && !currentUser.id.equals(user.creatorId)) {
 				throw new RecMeException(404, "User does not exist"); // general error message. To not hint at users id outside the scope
 			}
 			//TODO send mail ?

@@ -24,21 +24,23 @@ public class SecurityEngine {
 			if(session == null) {
 				throw new RecMeException(401, "Session expired");
 			}
-			session.datetime = (new Date()).getTime();
-			ObjectEngine.putObject(session, TYPE_SESSIONS);
+			session.datetime = new Date();
+			ObjectEngine.updateObject(session, TYPE_SESSIONS);
 		} catch(Exception e) {
 			throw new RecMeException(401, "Session expired");
 		}
 		
 		try {
 			User user = usersService.uncheckedGet(userIdFromSid(sessionId));
-			if(user.type == User.TYPE_ROOT) {
-				return user;
-			}
-			if(user.valid) {
-				for(short arg : args) {
-					if(user.type == arg) {
-						return user;
+			if(user != null) {
+				if(user.type == User.TYPE_ROOT) {
+					return user;
+				}
+				if(user.valid) {
+					for(short arg : args) {
+						if(user.type == arg) {
+							return user;
+						}
 					}
 				}
 			}
@@ -50,7 +52,7 @@ public class SecurityEngine {
 
 	public static String generateAndRegisterSid(User user) throws Exception {
 		String sid = generateSid(user);
-		ObjectEngine.putObject(new Session(sid, (new Date()).getTime()), TYPE_SESSIONS);
+		ObjectEngine.putObject(new Session(sid, new Date()), TYPE_SESSIONS);
 		return sid;
 	}
 	

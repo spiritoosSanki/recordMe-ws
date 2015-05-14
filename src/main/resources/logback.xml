@@ -1,0 +1,59 @@
+<configuration debug="false" scan="true" scanPeriod="60 seconds"> 
+
+  <property name="LOG_DIR" value="/var/log/ninsina/recordMe" scope="context" />
+ 
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="GLOBAL" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_DIR}/debug.gz</file>
+    <append>true</append>
+    <encoder>
+      <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
+    </encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_DIR}/debug.log.%d{yyyy-MM-dd}.gz</fileNamePattern>
+      <maxHistory>365</maxHistory>
+    </rollingPolicy>
+  </appender>
+                                
+  <appender name="USAGE" class="ch.qos.logback.classic.sift.SiftingAppender">
+    <timeout>1 minute</timeout>
+    <discriminator>
+      <key>APPLICATION</key>
+      <defaultValue>unknown</defaultValue>
+    </discriminator>
+	<sift>
+      <appender name="${APPLICATION}" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/${APPLICATION}/sessions.gz</file>
+        <append>true</append>
+        <encoder>
+          <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+          <fileNamePattern>${LOG_DIR}/${APPLICATION}/sessions.log.%d{yyyy-MM-dd}.gz</fileNamePattern>
+          <maxHistory>365</maxHistory>
+        </rollingPolicy>
+      </appender>
+	</sift>
+  </appender>  
+
+  <root level="debug">
+      <appender-ref ref="STDOUT" />
+      <appender-ref ref="GLOBAL" />
+      <appender-ref ref="USAGE" />
+  </root>
+  
+  <logger name="org.jboss.resteasy.core" level="INFO"/>
+  <logger name="org.jboss.resteasy.plugins.providers" level="INFO"/>
+  <logger name="org.jboss.resteasy.plugins.server" level="INFO"/>
+  <logger name="org.jboss.resteasy.specimpl" level="INFO"/>
+  <logger name="org.jboss.resteasy.mock" level="INFO"/>
+
+  <logger name="com.ninsina.recordMe.ws" level="INFO"/>
+  <logger name="com.ninsina.recordMe.core" level="INFO"/>
+  
+</configuration>
