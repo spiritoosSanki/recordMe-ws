@@ -1,7 +1,9 @@
 package com.ninsina.recordMe.sdk;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class User {
@@ -21,7 +23,7 @@ public class User {
 	public String lastName;
 	public String inscriptionDate;
 	
-	public String creatorId;
+	public Set<String> foreignAdminIds = new HashSet<String>();
 	
 	public boolean valid = false;
 	public String validToken;

@@ -121,11 +121,11 @@ public class UsersService {
 					throw new RecMeException(401, "Users can only update themselves");
 				}
 				if(currentUser.type == User.TYPE_FOREIGN_ADMIN) {
-					if(oldUser.creatorId == null) {
+					if(oldUser.foreignAdminIds == null) {
 						throw new RecMeException();
 					}
-					if(!oldUser.creatorId.equals(currentUser.id)) {
-						throw new RecMeException(401, "Foreign admin can only update user they created");
+					if(!oldUser.foreignAdminIds.contains(currentUser.id)) {
+						throw new RecMeException(401, "Foreign admin can only update user that has authorized them.");
 					}
 				}
 				
@@ -144,7 +144,7 @@ public class UsersService {
 	private User copyLowerUser(User currentUser, User oldUser, User user) throws RecMeException {
 		User copy = new User();
 		copy.id = oldUser.id;
-		copy.creatorId = oldUser.creatorId;
+		copy.foreignAdminIds = oldUser.foreignAdminIds;
 		copy.email = user.email;
 		copy.firstName = user.firstName;
 		copy.lastName = user.lastName;
@@ -182,7 +182,7 @@ public class UsersService {
 	private User copySelf(User oldUser, User user) throws RecMeException {
 		User copy = new User();
 		copy.id = oldUser.id;
-		copy.creatorId = oldUser.creatorId;
+		copy.foreignAdminIds = oldUser.foreignAdminIds;
 		copy.email = user.email;
 		copy.firstName = user.firstName;
 		copy.lastName = user.lastName;
@@ -204,7 +204,7 @@ public class UsersService {
 	}
 
 	public void create(String sessionId, User user) throws RecMeException {
-		User currentUser = SecurityEngine.checkUserAccess(sessionId, User.TYPE_ADMIN, User.TYPE_FOREIGN_ADMIN);
+		User currentUser = SecurityEngine.checkUserAccess(sessionId, User.TYPE_ADMIN);
 		try {
 			checkParam(user);
 			if(currentUser.type == User.TYPE_ADMIN) {
@@ -215,6 +215,7 @@ public class UsersService {
 				if(user.type != User.TYPE_USER) {
 					throw new RecMeException(400, "Foreign admin can only create users");
 				}
+				user.foreignAdminIds.add(currentUser.id);
 			}
 			if(uncheckedGet(user.id) != null) {
 				throw new RecMeException(409, "User already exist");
@@ -225,7 +226,6 @@ public class UsersService {
 				throw new RecMeException(400, "Choose another email");
 			}
 			
-			user.creatorId = currentUser.id;
 			user.oldPassword = user.password;
 			
 			user.validToken = generateToken(user);
@@ -303,7 +303,7 @@ public class UsersService {
 					throw new RecMeException(401, "Admin can only remove users and foreign admins");
 				}
 			}
-			if(currentUser.type == User.TYPE_FOREIGN_ADMIN && !currentUser.id.equals(user.creatorId)) {
+			if(currentUser.type == User.TYPE_FOREIGN_ADMIN && !user.foreignAdminIds.contains(currentUser.id)) {
 				throw new RecMeException(404, "User does not exist"); // general error message. To not hint at users id outside the scope
 			}
 			//TODO send mail ?

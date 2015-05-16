@@ -8,12 +8,13 @@ import com.ninsina.recordMe.core.SecurityEngine;
 import com.ninsina.recordMe.sdk.RecordMe;
 import com.ninsina.recordMe.sdk.User;
 import com.ninsina.recordMe.sdk.record.BasicRecord;
-import com.ninsina.recordMe.sdk.record.BasicRecord.PRIMARY_TAG;
+import com.ninsina.recordMe.sdk.record.BasicRecord.GENERAL_TAGS;
+import com.ninsina.recordMe.sdk.record.BasicRecord.SPECIFIC_TAGS;
 import com.ninsina.recordMe.ws.users.UsersService;
 
 public class BasicRecordsService {
 	
-	private static String TYPE_RECORD = "users";
+	private static String TYPE_RECORD = "record";
 	
 	private static UsersService usersService = new UsersService();
 
@@ -36,7 +37,7 @@ public class BasicRecordsService {
 				if(targetUser == null) {
 					throw new RecMeException(404, "User does not exist");
 				}
-				if(!targetUser.creatorId.equals(record.userId)) {
+				if(!targetUser.foreignAdminIds.contains(record.userId)) {
 					throw new RecMeException(401, "No privilege for this user");
 				}
 			} else if(currentUser.type == User.TYPE_USER) {
@@ -70,11 +71,11 @@ public class BasicRecordsService {
 			throw new RecMeException(400, "endTime field is malformed. Format supported is ISO 8601 : 2015-05-09T16:08:41Z");
 		}
 		
-		if(record.primaryTag == PRIMARY_TAG.DEFAULT) {
+		if(record.generalTag == GENERAL_TAGS.DEFAULT) {
 			throw new RecMeException(400, "You must specify a primary tag");
 		}
 		
-		if(record.secondaryTags == null || record.secondaryTags.size() == 0) {
+		if(record.specificTag == SPECIFIC_TAGS.DEFAULT) {
 			throw new RecMeException(400, "You must specify at least one secondary tag");
 		}
 		

@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.ninsina.recordMe.core.RecMeException;
 import com.ninsina.recordMe.sdk.record.BasicRecord;
 
-@Path("/users")
+@Path("/basicRecords")
 public class BasicRecordsResource {
 	
 	private Logger log = LoggerFactory.getLogger(BasicRecordsResource.class);
@@ -39,7 +39,7 @@ public class BasicRecordsResource {
 			log.debug("error: " + e.status + " msg: " + e.msg);
             res = Response.status(e.status).entity(e.msg).build();
 		}
-		log.info("{};{};users;POST;{};{};{}", new Object[] {httpReq.getRemoteAddr(), sessionId, res.getStatus(), System.nanoTime() - start, record});
+		log.info("{};{};basicRecords;POST;{};{};{}", new Object[] {httpReq.getRemoteAddr(), sessionId, res.getStatus(), System.nanoTime() - start, record});
 		return res;
 	}
 	
@@ -57,7 +57,7 @@ public class BasicRecordsResource {
 			log.debug("error: " + e.status + " msg: " + e.msg);
             res = Response.status(e.status).entity(e.msg).build();
 		}
-		log.info("{};{};users;DELETE;{};{};{}", new Object[] {httpReq.getRemoteAddr(), sessionId, res.getStatus(), System.nanoTime() - start, recordId});
+		log.info("{};{};basicRecords;DELETE;{};{};{}", new Object[] {httpReq.getRemoteAddr(), sessionId, res.getStatus(), System.nanoTime() - start, recordId});
 		return res;
 	}
 	
@@ -74,7 +74,7 @@ public class BasicRecordsResource {
 			log.debug("error: " + e.status + " msg: " + e.msg);
             res = Response.status(e.status).entity(e.msg).build();
 		}
-		log.info("{};{};users;PUT;{};{};{}", new Object[] {httpReq.getRemoteAddr(), sessionId, res.getStatus(), System.nanoTime() - start, record});
+		log.info("{};{};basicRecords;PUT;{};{};{}", new Object[] {httpReq.getRemoteAddr(), sessionId, res.getStatus(), System.nanoTime() - start, record});
 		return res;
 	}
 	
@@ -91,7 +91,7 @@ public class BasicRecordsResource {
 			log.debug("error: " + e.status + " msg: " + e.msg);
             res = Response.status(e.status).entity(e.msg).build();
 		}
-		log.info("{};{};users;GET;{};{};{}", new Object[] {httpReq.getRemoteAddr(), sessionId, res.getStatus(), System.nanoTime() - start, recordId});
+		log.info("{};{};basicRecords;GET;{};{};{}", new Object[] {httpReq.getRemoteAddr(), sessionId, res.getStatus(), System.nanoTime() - start, recordId});
 		return res;
 	}
 }
