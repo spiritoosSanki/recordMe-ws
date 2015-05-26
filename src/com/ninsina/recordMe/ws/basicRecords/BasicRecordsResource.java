@@ -94,4 +94,6 @@ public class BasicRecordsResource {
 		log.info("{};{};basicRecords;GET;{};{};{}", new Object[] {httpReq.getRemoteAddr(), sessionId, res.getStatus(), System.nanoTime() - start, recordId});
 		return res;
 	}
+	
+	//TODO add a get with a list of ids
 }

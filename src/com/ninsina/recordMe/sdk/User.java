@@ -22,6 +22,7 @@ public class User {
 	public String firstName;
 	public String lastName;
 	public String inscriptionDate;
+	public UserMeasures measures;
 	
 	public Set<String> foreignAdminIds = new HashSet<String>();
 	

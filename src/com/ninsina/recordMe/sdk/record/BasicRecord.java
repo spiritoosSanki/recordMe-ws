@@ -18,8 +18,15 @@ public class BasicRecord {
 	
 	/** mandatory fields **/
 	
+	/**
+	 * Id of the user the record belongs to.
+	 * */
 	public String userId;
 	
+	/**
+	 * Date time of the record. 
+	 * If {@link #endTime} is filled, it is considered as start date time of the record.
+	 * */
 	public String dateTime;
 	
 	public long generalTag = GENERAL_TAGS.DEFAULT;
@@ -27,7 +34,7 @@ public class BasicRecord {
 	public long specificTag = SPECIFIC_TAGS.DEFAULT;
 	
 	/** origine of the record : device ? phone ? app ? */
-	public static String from;
+	public String from;
 	
 	
 	
