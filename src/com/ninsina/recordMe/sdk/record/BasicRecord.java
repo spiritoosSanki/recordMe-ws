@@ -51,7 +51,7 @@ public class BasicRecord {
 	/**
 	 * Properties for putting all measures. Will be used for statistics API.
 	 * */
-	public Map<String, ValUnit> measureProperties = new HashMap<String, ValUnit>();
+	public Map<String, Measure> measureProperties = new HashMap<String, Measure>();
 	
 	/**
 	 * All other properties.
@@ -86,6 +86,12 @@ public class BasicRecord {
 			public static long MOVIE = 201;
 			public static long SERIE = 202;
 			public static long OPERA = 203;
+			public static long BOOK = 204;
+			public static long AUDIO_BOOK = 205;
+		}
+		
+		public static class HEALTH {
+			public static long WEIGHT = 401;
 		}
 	}
 	

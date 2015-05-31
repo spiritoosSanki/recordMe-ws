@@ -151,6 +151,8 @@ public class UsersService {
 		copy.password = user.password;
 		copy.oldPassword = user.password;
 		copy.properties = user.properties;
+		copy.birth = user.birth;
+		copy.inscriptionDate = user.inscriptionDate;
 		if(user.type != oldUser.type) {
 			if(currentUser.type == User.TYPE_ROOT) {
 				
@@ -164,9 +166,8 @@ public class UsersService {
 				}
 			}
 		}
-		copy.type = user.type;
+		copy.type = oldUser.type; // no changing type allowed
 		
-		copy.type = oldUser.type;
 		if(user.valid != oldUser.valid) {
 			if(currentUser.type != User.TYPE_ROOT || currentUser.type != User.TYPE_ADMIN) {
 				throw new RecMeException(401, "Not enough privilege to change validation");
@@ -189,6 +190,8 @@ public class UsersService {
 		copy.password = user.password;
 		copy.oldPassword = user.password;
 		copy.properties = user.properties;
+		copy.birth = user.birth;
+		copy.inscriptionDate = user.inscriptionDate;
 		if(user.type != oldUser.type) {
 			throw new RecMeException(401, "Cannot not change your own privileges");
 		}
