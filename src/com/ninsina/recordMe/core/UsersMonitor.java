@@ -46,6 +46,7 @@ public class UsersMonitor {
 			    logger.debug("scanning users...");
 			    
 			    //TODO refactor with the cache ?
+			    //TODO test all this !
 			    //then delete
 			    
 			    int offset = 0;
@@ -58,8 +59,8 @@ public class UsersMonitor {
 				while(goOn) {
 					List<User> tmpUser = usersService.uncheckedSearch(
 							Arrays.asList(Arrays.asList(
-				    				new Term("valid", Term.OPERATOR_EQ, "false"),
-				    				new Term("validDate", Term.OPERATOR_LT, then )
+				    				new Term("valid", Term.OPERATOR_EQ, Term.TYPE_BOOLEAN, "false"),
+				    				new Term("validDate", Term.OPERATOR_LT, Term.TYPE_STRING, then )
 			    			)), 
 			    			offset, 
 			    			bucketSize);

@@ -114,17 +114,17 @@ public class ObjectEngine {
 			for(Term term : orTerms) {
 				Bson operation = null;
 				if(term.operator == Term.OPERATOR_EQ) {
-					operation = eq(parseProperty(term.property), parseValue(term.value));
+					operation = eq(parseProperty(term.property), parseValue(term));
 				} else if(term.operator == Term.OPERATOR_NE) {
-					operation = ne(parseProperty(term.property), parseValue(term.value));
+					operation = ne(parseProperty(term.property), parseValue(term));
 				} else if(term.operator == Term.OPERATOR_GT) {
-					operation = gt(parseProperty(term.property), parseValue(term.value));
+					operation = gt(parseProperty(term.property), parseValue(term));
 				} else if(term.operator == Term.OPERATOR_GTE) {
-					operation = gte(parseProperty(term.property), parseValue(term.value));
+					operation = gte(parseProperty(term.property), parseValue(term));
 				} else if(term.operator == Term.OPERATOR_LT) {
-					operation = lt(parseProperty(term.property), parseValue(term.value));
+					operation = lt(parseProperty(term.property), parseValue(term));
 				} else if(term.operator == Term.OPERATOR_LTE) {
-					operation = lte(parseProperty(term.property), parseValue(term.value));
+					operation = lte(parseProperty(term.property), parseValue(term));
 				} else {
 					throw new RecMeException(400, "Term operator '" + term.operator +"' does not exist.");
 				}
@@ -162,20 +162,18 @@ public class ObjectEngine {
 		
 	}
 
-	private static Object parseValue(String value) {
+	private static Object parseValue(Term term) {
 		try {
-			return Float.parseFloat(value);
-		} catch(Exception e) {
-			try {
-				return Integer.parseInt(value);
-			} catch(Exception e2) {
-				if("true".equals(value)) {
-					return true;
-				} else if("false".equals(value)) {
-					return false;
-				}
-				return value;
+			if(term.type == Term.TYPE_BOOLEAN) {
+				return Boolean.parseBoolean(term.value);
 			}
-		}
+			if(term.type == Term.TYPE_FLOAT) {
+				return Float.parseFloat(term.value);
+			}
+			if(term.type == Term.TYPE_INT) {
+				return Integer.parseInt(term.value);
+			}
+		} catch(Exception e) {}
+		return term.value;
 	}
 }

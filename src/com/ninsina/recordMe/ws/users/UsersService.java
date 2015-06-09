@@ -20,8 +20,8 @@ public class UsersService {
 		try {
 			List<User> res = ObjectEngine.search(
 					Arrays.asList(Arrays.asList(
-						new Term("email", Term.OPERATOR_EQ, login),
-						new Term("password", Term.OPERATOR_EQ, password)
+						new Term("email", Term.OPERATOR_EQ, Term.TYPE_STRING, login),
+						new Term("password", Term.OPERATOR_EQ, Term.TYPE_STRING, password)
 					)),
 					TYPE_USERS,
 					0,
@@ -57,8 +57,8 @@ public class UsersService {
 			} else if(currentUser.type == User.TYPE_FOREIGN_ADMIN) {
 				List<User> tmp = uncheckedSearch(
 						Arrays.asList(Arrays.asList(
-								new Term("id", Term.OPERATOR_EQ, userId),
-								new Term("creatorId", Term.OPERATOR_EQ, currentUser.id))
+								new Term("id", Term.OPERATOR_EQ, Term.TYPE_STRING, userId),
+								new Term("creatorId", Term.OPERATOR_EQ, Term.TYPE_STRING, currentUser.id))
 						), 
 						0, 
 						1
@@ -224,7 +224,7 @@ public class UsersService {
 				throw new RecMeException(409, "User already exist");
 			}
 			
-			List<User> users = uncheckedSearch(Arrays.asList(Arrays.asList(new Term("email", Term.OPERATOR_EQ, user.email))), 0, 1);
+			List<User> users = uncheckedSearch(Arrays.asList(Arrays.asList(new Term("email", Term.OPERATOR_EQ, Term.TYPE_STRING, user.email))), 0, 1);
 			if(users.size() != 0) {
 				throw new RecMeException(400, "Choose another email");
 			}
@@ -261,6 +261,10 @@ public class UsersService {
 	private void checkParam(User user) throws RecMeException {
 		if(user.id == null) {
 			user.id = UUID.randomUUID().toString();
+		} else {
+			if(user.id.indexOf("_") != -1) {
+				throw new RecMeException(400, "Id can not contain '_' character");
+			}
 		}
 		if(user.password == null || user.password.length() < 8) {
 			throw new RecMeException(400, "Password must be at least 8 characters long");

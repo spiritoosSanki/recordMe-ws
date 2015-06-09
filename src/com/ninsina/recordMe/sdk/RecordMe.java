@@ -29,6 +29,7 @@ import ch.boye.httpclientandroidlib.params.HttpProtocolParams;
 import ch.boye.httpclientandroidlib.util.EntityUtils;
 
 import com.ninsina.recordMe.core.RecMeException;
+import com.ninsina.recordMe.sdk.record.BasicRecord;
 
 @SuppressWarnings("deprecation")
 public class RecordMe {
@@ -44,7 +45,7 @@ public class RecordMe {
 	private static final String DATE_FORMAT_WITH_MILLISECONDS = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 	
 	public Users Users = new Users();
-	
+	public BasicRecords BasicRecords = new BasicRecords();
 	
 	
 
@@ -348,7 +349,7 @@ public class RecordMe {
 	
 	
 	
-	
+
 	public class Users {
 
 		public String login(String login, String password) throws RecMeException {
@@ -377,7 +378,7 @@ public class RecordMe {
 		
 		/**
 		 * Get a user by his ID.
-		 * Normal user can get only itself. So easier to use get(Session id)
+		 * Normal user can get only itself. So easier to use {@link #get(String)}
 		 * */
 		public User get(String sessionId, String userId) throws RecMeException {
 			String content = getReq("/users/" + userId, sessionId);
@@ -391,6 +392,28 @@ public class RecordMe {
 			String content = getReq("/users/null", sessionId);
 			return decodeContent(content, User.class);
 		}
+	}
+	
+	
+	public class BasicRecords {
+
+		public void create(String sessionId, BasicRecord basicRecord) throws RecMeException {
+			post("/basicRecords", sessionId, jsonify(basicRecord));
+		}
+		
+		public void update(String sessionId, BasicRecord basicRecord) throws RecMeException {
+			put("/basicRecords", sessionId, jsonify(basicRecord));
+		}
+		
+		public void remove(String sessionId, String id) throws RecMeException {
+			delete("/basicRecords/" + id, sessionId, null);
+		}
+		
+		public User get(String sessionId, String id) throws RecMeException {
+			String content = getReq("/basicRecords/" + id, sessionId);
+			return decodeContent(content, User.class);
+		}
+		
 	}
 	
 }

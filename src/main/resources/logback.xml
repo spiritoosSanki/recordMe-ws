@@ -52,6 +52,8 @@
   <logger name="org.jboss.resteasy.plugins.server" level="INFO"/>
   <logger name="org.jboss.resteasy.specimpl" level="INFO"/>
   <logger name="org.jboss.resteasy.mock" level="INFO"/>
+  
+  <logger name="org.mongodb.driver.cluster" level="INFO"/>
 
   <logger name="com.ninsina.recordMe.ws" level="INFO"/>
   <logger name="com.ninsina.recordMe.core" level="INFO"/>
