@@ -3,6 +3,8 @@ package main.test;
 import com.ninsina.recordMe.core.RecMeException;
 import com.ninsina.recordMe.sdk.RecordMe;
 import com.ninsina.recordMe.sdk.User;
+import com.ninsina.recordMe.sdk.record.BasicRecord;
+import com.ninsina.recordMe.sdk.record.Measure;
 
 public class BasicRecordsTest {
 
@@ -11,32 +13,34 @@ public class BasicRecordsTest {
 	public static void main(String[] args) throws RecMeException {
 		recMe = new RecordMe("http://localhost:9090/recordMe-ws");
 		
-		String sid = recMe.Users.login("sankar.grimm@gmail.com", "recme123");
+		String sid = recMe.Users.login("sankargri.mm@gmail.com", "12345678");
+
+//		create(sid);
 		
-		get(sid);
+//		get(sid);
+
+		delete(sid);
 		
-//		createAdmin(sid);
-		
-//		deleteAdmin(sid);
-	}
-	
-	private static void deleteAdmin(String sid) throws RecMeException {
-		recMe.Users.remove(sid, "an_admin1");
+		System.out.println("end");
 	}
 
 	private static void get(String sid) throws RecMeException {
-		User user = recMe.Users.get(sid, null);
-		System.out.println(user);
+		System.out.println(recMe.BasicRecords.get(sid, "firstRec"));
 	}
 
-	private static void createAdmin(String sid) throws RecMeException {
-		User user = new User();
-		user.id = "an_admin1";
-		user.email = "sankargrim.m@gmail.com";
-		user.firstName = "sankar";
-		user.lastName = "admin";
-		user.password = "12345678";
-		user.type = User.TYPE_ADMIN;
-		recMe.Users.create(sid, user);
+	private static void delete(String sid) throws RecMeException {
+		recMe.BasicRecords.remove(sid, "firstRec");
 	}
+
+	private static void create(String sid) throws RecMeException {
+		BasicRecord br = new BasicRecord();
+		br.id = "firstRec";
+		br.dateTime = RecordMe.getIso8601UTCDateString(null);
+		br.from = "test";
+		br.generalTag = BasicRecord.GENERAL_TAGS.SPORT;
+		br.specificTag = BasicRecord.SPECIFIC_TAGS.SPORT.RUNNING;
+		br.measureProperties.put("duration", new Measure("18000", Measure.UNIT.DURATION));
+		recMe.BasicRecords.create(sid, br);
+	}
+	
 }

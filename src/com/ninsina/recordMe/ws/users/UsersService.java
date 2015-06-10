@@ -295,6 +295,7 @@ public class UsersService {
 		return ObjectEngine.search(terms, TYPE_USERS, offset, bucketSize, User.class);
 	}
 
+	//TODO remove all records! 
 	public void remove(String sessionId, String userId) throws RecMeException {
 		User currentUser = SecurityEngine.checkUserAccess(sessionId, User.TYPE_ADMIN, User.TYPE_USER);
 		try {

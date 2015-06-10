@@ -46,8 +46,6 @@ public class BasicRecord {
 	 * */
 	public String eventId;
 	
-	public String endTime;
-	
 	/**
 	 * Properties for putting all measures. Will be used for statistics API.
 	 * */
@@ -94,5 +92,19 @@ public class BasicRecord {
 			public static long WEIGHT = 401;
 		}
 	}
+
+	
+	
+	@Override
+	public String toString() {
+		return "BasicRecord [id=" + id + ", userId=" + userId + ", dateTime="
+				+ dateTime + ", generalTag=" + generalTag + ", specificTag="
+				+ specificTag + ", from=" + from + ", eventId=" + eventId
+				+ ", measureProperties=" + measureProperties
+				+ ", otherProperties=" + otherProperties + "]";
+	}
+	
+	
+	
 	
 }

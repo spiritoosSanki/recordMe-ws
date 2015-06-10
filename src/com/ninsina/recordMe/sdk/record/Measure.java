@@ -10,10 +10,15 @@ public class Measure {
 	/** Unit of the measure. User {@link UNIT}. */
 	public String unit;
 	
-	
+
 	
 	public Measure() {
 		
+	}
+	
+	public Measure(String value, String unit) {
+		this.value = value;
+		this.unit = unit;
 	}
 	
 	

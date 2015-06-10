@@ -15,7 +15,7 @@ import com.ninsina.recordMe.ws.users.UsersService;
 
 public class BasicRecordsService {
 	
-	private static String TYPE_RECORD = "record";
+	private static String TYPE_RECORD = "records";
 	
 	private static UsersService usersService = new UsersService();
 
@@ -24,7 +24,7 @@ public class BasicRecordsService {
 		
 		try {
 			checkParam(record, true);
-			if(ObjectEngine.getObject(record.id, TYPE_RECORD, BasicRecord.class) == null) {
+			if(ObjectEngine.getObject(record.id, TYPE_RECORD, BasicRecord.class) != null) {
 				throw new RecMeException(409, "Record with same id already exists.");
 			}
 			checkRights(currentUser, record);
@@ -80,20 +80,6 @@ public class BasicRecordsService {
 		} catch (Exception e1) {
 			throw new RecMeException(400, "'dateTime' field is malformed. Format supported is ISO 8601 : 2015-05-09T16:08:41Z");
 		}
-		try {
-			if(record.endTime != null) {
-				Date end = RecordMe.getDateFromIso8601UTCString(record.endTime);
-				if(end.after(now)) {
-					throw new RecMeException(400, "'endTime' is in the future.");
-				}
-				if(start.after(end)) {
-					throw new RecMeException(400, "'endTime' is after dateTime.");
-				}
-			}
-		} catch (Exception e1) {
-			throw new RecMeException(400, "'endTime' field is malformed. Format supported is ISO 8601 : 2015-05-09T16:08:41Z");
-		}
-		
 		if(record.generalTag == GENERAL_TAGS.DEFAULT) {
 			throw new RecMeException(400, "You must specify a primary tag");
 		}

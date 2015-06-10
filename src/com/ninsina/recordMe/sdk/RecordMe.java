@@ -409,9 +409,9 @@ public class RecordMe {
 			delete("/basicRecords/" + id, sessionId, null);
 		}
 		
-		public User get(String sessionId, String id) throws RecMeException {
+		public BasicRecord get(String sessionId, String id) throws RecMeException {
 			String content = getReq("/basicRecords/" + id, sessionId);
-			return decodeContent(content, User.class);
+			return decodeContent(content, BasicRecord.class);
 		}
 		
 	}
