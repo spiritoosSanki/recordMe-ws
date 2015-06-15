@@ -27,7 +27,7 @@ public class BasicRecordsService {
 			if(ObjectEngine.getObject(record.id, TYPE_RECORD, BasicRecord.class) != null) {
 				throw new RecMeException(409, "Record with same id already exists.");
 			}
-			checkRights(currentUser, record);
+			checkCreateRights(currentUser, record);
 			
 			ObjectEngine.putObject(record, TYPE_RECORD);
 		} catch (RecMeException e) {
@@ -37,7 +37,7 @@ public class BasicRecordsService {
 		}
 	}
 
-	private void checkRights(User currentUser, BasicRecord record) throws RecMeException {
+	private void checkCreateRights(User currentUser, BasicRecord record) throws RecMeException {
 		if(currentUser.type == User.TYPE_ROOT || currentUser.type == User.TYPE_ADMIN) {
 			if(record.userId == null) {
 				throw new RecMeException(400, "User id is null");
@@ -62,8 +62,23 @@ public class BasicRecordsService {
 	}
 
 	private void checkParam(BasicRecord record, boolean create) throws RecMeException {
-		if(create && record.id == null) {
-			record.id = UUID.randomUUID().toString();
+		if(create) { 
+			if(record.id == null) {
+				record.id = UUID.randomUUID().toString();
+			}
+		} else {
+			if(record.id == null) {
+				throw new RecMeException(400, "Id is null");
+			} else {
+				BasicRecord rec = null;
+				try {
+					rec = ObjectEngine.getObject(record.id, TYPE_RECORD, BasicRecord.class);
+				} catch (Exception e) {}
+				
+				if(rec == null) {
+					throw new RecMeException(404, "Record does not exist");
+				}
+			}
 		}
 		
 		if(record.from == null || "".equals(record.from)) {
@@ -123,7 +138,7 @@ public class BasicRecordsService {
 		
 		try {
 			checkParam(record, false);
-			checkRights(currentUser, record);
+			checkUpdateRights(currentUser, record);
 			
 			ObjectEngine.updateObject(record, TYPE_RECORD);
 			
@@ -131,6 +146,32 @@ public class BasicRecordsService {
 			throw e;
 		} catch (Exception e) {
 			throw new RecMeException();
+		}
+	}
+
+	private void checkUpdateRights(User currentUser, BasicRecord record) throws RecMeException {
+		if(currentUser.type == User.TYPE_ROOT || currentUser.type == User.TYPE_ADMIN) {
+			if(record.userId == null) {
+				throw new RecMeException(400, "User id is null");
+			}
+			if(usersService.uncheckedGet(record.userId) == null) {
+				throw new RecMeException(404, "User does not exist");
+			}
+		} else if(currentUser.type == User.TYPE_FOREIGN_ADMIN) {
+			BasicRecord oldRecord;
+			try {
+				oldRecord = ObjectEngine.getObject(record.id, TYPE_RECORD, BasicRecord.class);
+			} catch(Exception e) {
+				throw new RecMeException(500, "Unexpected error");
+			}
+			User targetUser = usersService.uncheckedGet(oldRecord.userId);
+			if(!targetUser.foreignAdminIds.contains(oldRecord.userId)) {
+				throw new RecMeException(401, "No privilege for this user");
+			}
+			record.userId = oldRecord.userId;
+			
+		} else if(currentUser.type == User.TYPE_USER) {
+			record.userId = currentUser.id;
 		}
 	}
 
@@ -161,5 +202,5 @@ public class BasicRecordsService {
 			throw new RecMeException();
 		}
 	}
-
+	
 }

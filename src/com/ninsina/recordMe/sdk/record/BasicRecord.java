@@ -55,7 +55,9 @@ public class BasicRecord {
 	 * All other properties.
 	 * */
 	public Map<String, String> otherProperties = new HashMap<String, String>();
-	
+
+	public static double longitude = Double.NaN;
+	public static double latitude = Double.NaN;
 	
 	
 	/** Constants **/
