@@ -45,7 +45,6 @@ public class UsersMonitor {
 
 			    logger.debug("scanning users...");
 			    
-			    //TODO refactor with the cache ?
 			    //TODO test all this !
 			    //then delete
 			    
@@ -75,7 +74,7 @@ public class UsersMonitor {
 				for(User user : users) {
 
 					if (MemoryCache.get(USER_VALID_MONITOR, user.id) == null) {
-						// prevent other frontends to handle this alert too...
+						// prevent other servers to handle this user too...
 						try {
 							MemoryCache.put(USER_VALID_MONITOR, user.id, "");
 							ObjectEngine.removeObject(user.id, UsersService.TYPE_USERS);

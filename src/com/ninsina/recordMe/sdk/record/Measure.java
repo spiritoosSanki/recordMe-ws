@@ -7,7 +7,7 @@ package com.ninsina.recordMe.sdk.record;
 public class Measure {
 	
 	public String value;
-	/** Unit of the measure. User {@link UNIT}. */
+	/** Unit of the measure. Use {@link UNIT}. */
 	public String unit;
 	
 
